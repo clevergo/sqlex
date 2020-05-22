@@ -34,20 +34,17 @@ func TestMain(m *testing.M) {
 	}
 	mockDBx = sqlx.MustOpen("mysql", fmt.Sprintf("root%s@/%s", dbPassword, dbName))
 	defer mockDBx.Close()
+	mockDB = mockDBx.DB
 	mockDBx.MustExec(fmt.Sprintf("DROP TABLE IF EXISTS %s", mockTable))
 	mockDBx.MustExec(fmt.Sprintf("CREATE TABLE %s(id varchar(36) not null, PRIMARY KEY(id))", mockTable))
-	mockDB = mockDBx.DB
+	insertMockRow(mockDB, "foo")
+	insertMockRow(mockDB, "bar")
 
 	m.Run()
 }
 
-func insertMockRow(tx *sql.Tx, id string) error {
-	_, err := tx.Exec(fmt.Sprintf("INSERT INTO %s VALUES(?)", mockTable), id)
-	return err
-}
-
-func insertMockRowx(tx *sqlx.Tx, id string) error {
-	_, err := tx.Exec(fmt.Sprintf("INSERT INTO %s VALUES(?)", mockTable), id)
+func insertMockRow(e Execer, id string) error {
+	_, err := e.Exec(fmt.Sprintf("INSERT INTO %s VALUES(?)", mockTable), id)
 	return err
 }
 
@@ -111,7 +108,7 @@ func TestTransactContext(t *testing.T) {
 
 func TestTransactx(t *testing.T) {
 	err := Transactx(mockDBx, func(tx *sqlx.Tx) error {
-		assert.Nil(t, insertMockRowx(tx, "transactx"))
+		assert.Nil(t, insertMockRow(tx, "transactx"))
 		return nil
 	})
 	assert.Nil(t, err)
@@ -119,7 +116,7 @@ func TestTransactx(t *testing.T) {
 
 	expectedErr := errors.New("error from transaction")
 	err = Transactx(mockDBx, func(tx *sqlx.Tx) error {
-		assert.Nil(t, insertMockRowx(tx, "transactx_error"))
+		assert.Nil(t, insertMockRow(tx, "transactx_error"))
 		return expectedErr
 	})
 	assert.Equal(t, expectedErr, err)
@@ -128,7 +125,7 @@ func TestTransactx(t *testing.T) {
 	// panic
 	assert.Panics(t, func() {
 		Transactx(mockDBx, func(tx *sqlx.Tx) error {
-			assert.Nil(t, insertMockRowx(tx, "transactx_panic"))
+			assert.Nil(t, insertMockRow(tx, "transactx_panic"))
 			panic("transactx_panic")
 		})
 	})
@@ -137,7 +134,7 @@ func TestTransactx(t *testing.T) {
 
 func TestTransactContextx(t *testing.T) {
 	err := TransactContextx(context.Background(), nil, mockDBx, func(ctx context.Context, tx *sqlx.Tx) error {
-		assert.Nil(t, insertMockRowx(tx, "transact_contextx"))
+		assert.Nil(t, insertMockRow(tx, "transact_contextx"))
 		return nil
 	})
 	assert.Nil(t, err)
@@ -145,7 +142,7 @@ func TestTransactContextx(t *testing.T) {
 
 	expectedErr := errors.New("error from transaction")
 	err = TransactContextx(context.Background(), nil, mockDBx, func(ctx context.Context, tx *sqlx.Tx) error {
-		assert.Nil(t, insertMockRowx(tx, "transact_contextx_error"))
+		assert.Nil(t, insertMockRow(tx, "transact_contextx_error"))
 		return expectedErr
 	})
 	assert.Equal(t, expectedErr, err)
@@ -154,7 +151,7 @@ func TestTransactContextx(t *testing.T) {
 	// panic
 	assert.Panics(t, func() {
 		TransactContextx(context.Background(), nil, mockDBx, func(ctx context.Context, tx *sqlx.Tx) error {
-			assert.Nil(t, insertMockRowx(tx, "transact_contextx_panic"))
+			assert.Nil(t, insertMockRow(tx, "transact_contextx_panic"))
 			panic("transact_contextx_panic")
 		})
 	})

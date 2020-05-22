@@ -4,12 +4,39 @@
 
 package sqlex
 
-import "testing"
+import (
+	"context"
+	"fmt"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestExec(t *testing.T) {
-	// TBD
+	cases := []struct {
+		ctx context.Context
+		id  string
+	}{
+		{nil, "exec"},
+		{context.Background(), "exec_context"},
+	}
+	for _, test := range cases {
+		_, err := Exec(test.ctx, mockDBx, fmt.Sprintf("INSERT INTO %s(id) VALUES (?)", mockTable), test.id)
+		assert.Nil(t, err)
+		assert.True(t, isMockRowExists(test.id))
+	}
 }
 
 func TestMustExec(t *testing.T) {
-	// TBD
+	cases := []struct {
+		ctx context.Context
+		id  string
+	}{
+		{nil, "mustexec"},
+		{context.Background(), "mustexec_context"},
+	}
+	for _, test := range cases {
+		MustExec(test.ctx, mockDBx, fmt.Sprintf("INSERT INTO %s(id) VALUES (?)", mockTable), test.id)
+		assert.True(t, isMockRowExists(test.id))
+	}
 }
