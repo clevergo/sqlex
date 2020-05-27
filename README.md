@@ -6,7 +6,7 @@
 [![Release](https://img.shields.io/github/release/clevergo/sqlex.svg?style=flat-square)](https://github.com/clevergo/sqlex/releases)
 [![Sourcegraph](https://sourcegraph.com/github.com/clevergo/sqlex/-/badge.svg)](https://sourcegraph.com/github.com/clevergo/sqlex?badge)
 
-SQLEX is an extensions for database/sql and jmoiron/sqlx.
+SQLEX is extensions for database/sql and jmoiron/sqlx.
 
 ## Transaction
 
