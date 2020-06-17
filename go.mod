@@ -1,4 +1,4 @@
-module github.com/clevergo/sqlex
+module clevergo.tech/sqlex
 
 go 1.13
 
